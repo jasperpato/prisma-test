@@ -4,7 +4,7 @@ export default async function assetHandler(req, res) {
   switch (req.method) {
     case 'GET':
       try {
-        const actions = await prisma.action.findMany()
+        const actions = await prisma.action.findMany();
         // const actions = 'ass';
         res.status(200).json(actions[0].Title)
       } catch (e) {
