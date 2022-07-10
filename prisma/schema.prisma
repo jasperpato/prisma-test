@@ -1,11 +1,106 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["referentialIntegrity"]
 }
 
-datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
-  referentialIntegrity = "prisma"
+model Action {
+  RegisterId   Int
+  ActionId     Int
+  EditId       Int            @default(0)
+  CreatorId    String         @db.VarChar(36)
+  Title        String         @db.VarChar(50)
+  Text         String?        @db.VarChar(500)
+  Status       Action_Status? @default(draft)
+  CreationDate DateTime       @default(now()) @db.Timestamp(0)
+  EditDate     DateTime       @default(now()) @db.Timestamp(0)
+  DeleteDate   DateTime?      @db.Timestamp(0)
+  DueDate      DateTime       @db.Timestamp(0)
+
+  @@id([ActionId, EditId])
 }
 
+model Comment {
+  ActionId     Int
+  CommentId    Int
+  AccountId    String    @db.VarChar(36)
+  EditId       Int       @default(0)
+  Text         String    @db.VarChar(500)
+  CreationDate DateTime  @default(now()) @db.Timestamp(0)
+  EditDate     DateTime  @default(now()) @db.Timestamp(0)
+  DeleteDate   DateTime? @db.Timestamp(0)
+
+  @@id([CommentId, EditId])
+}
+
+model Org {
+  OrgId        Int
+  EditId       Int       @default(0)
+  Name         String    @db.VarChar(50)
+  CreationDate DateTime  @default(now()) @db.Timestamp(0)
+  EditDate     DateTime  @default(now()) @db.Timestamp(0)
+  DeleteDate   DateTime? @db.Timestamp(0)
+
+  @@id([OrgId, EditId])
+}
+
+model Org_Users {
+  AccountId       String    @db.VarChar(36)
+  OrgId           Int
+  EditId          Int       @default(0)
+  Owner           Boolean   @default(false)
+  CreateRegisters Int       @default(0)
+  RemovedDate     DateTime? @db.Timestamp(0)
+
+  @@id([AccountId, OrgId, EditId])
+}
+
+model Register {
+  OrgId        Int
+  RegisterId   Int
+  EditId       Int       @default(0)
+  Name         String    @db.VarChar(50)
+  CreationDate DateTime  @default(now()) @db.Timestamp(0)
+  EditDate     DateTime  @default(now()) @db.Timestamp(0)
+  DeleteDate   DateTime? @db.Timestamp(0)
+
+  @@id([RegisterId, EditId])
+}
+
+model Register_Users {
+  AccountId   String    @db.VarChar(36)
+  RegisterId  Int
+  OrgId       Int
+  EditId      Int       @default(0)
+  Chair       Boolean   @default(false)
+  RemovedDate DateTime? @db.Timestamp(0)
+
+  @@id([AccountId, RegisterId, OrgId, EditId])
+}
+
+model User {
+  AccountId    String    @db.VarChar(36)
+  Email        String    @db.VarChar(50)
+  Name         String    @db.VarChar(50)
+  PasswordHash String    @db.VarChar(128)
+  PasswordSalt String    @db.VarChar(128)
+  EditId       Int       @default(0)
+  CreationDate DateTime  @default(now()) @db.Timestamp(0)
+  EditDate     DateTime  @default(now()) @db.Timestamp(0)
+  DeleteDate   DateTime? @db.Timestamp(0)
+
+  @@id([AccountId, EditId])
+}
+
+enum Action_Status {
+  draft
+  assigned
+  accepted_and_in_progress  @map("accepted and in progress")
+  pending_completed         @map("pending completed")
+  completed
+}
